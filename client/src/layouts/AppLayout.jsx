@@ -1,6 +1,7 @@
 import Sidebar from '../components/Sidebar'
 import TopNav  from '../components/TopNav'
 import { Outlet } from 'react-router-dom'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 export default function AppLayout() {
   return (
@@ -12,7 +13,9 @@ export default function AppLayout() {
       <div className="flex flex-col flex-1 overflow-hidden">
         <TopNav />
         <main className="flex-1 overflow-y-auto p-6">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

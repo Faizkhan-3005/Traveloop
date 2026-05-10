@@ -16,7 +16,17 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import CreateTrip from './pages/CreateTrip'
 import TripDetails from './pages/TripDetails'
+import EditTrip from './pages/EditTrip'
+import Profile from './pages/Profile'
+import Community from './pages/Community'
+import MyTrips from './pages/MyTrips'
+import SecuritySettings from './pages/SecuritySettings'
+import PackingPage from './pages/PackingPage'
+import BudgetPage from './pages/BudgetPage'
+import AIPlanner from './pages/AIPlanner'
+import Notes from './pages/Notes'
 import ComingSoon from './components/ComingSoon'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,67 +41,72 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              className: 'dark:bg-slate-800 dark:text-white dark:border-slate-700',
-              duration: 4000,
-            }}
-          />
-          <Routes>
-            {/* Root redirect */}
-            <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
+        <ErrorBoundary>
+          <BrowserRouter>
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                className: 'dark:bg-slate-800 dark:text-white dark:border-slate-700',
+                duration: 4000,
+              }}
+            />
+            <Routes>
+              {/* Root redirect */}
+              <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
 
-            {/* ── Auth routes ──────────────────────────────────────────────── */}
-            <Route element={<AuthLayout />}>
-              <Route path="/login"    element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Route>
+              {/* ── Auth routes ──────────────────────────────────────────────── */}
+              <Route element={<AuthLayout />}>
+                <Route path="/login"    element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Route>
 
-            {/* ── Protected app routes ──────────────────────────────────────── */}
-            <Route
-              path="/app"
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard"  element={<Dashboard />} />
-              <Route path="trips"      element={<ComingSoon title="My Trips – Coming in Phase 2" />} />
-              <Route path="trips/new"  element={<CreateTrip />} />
-              <Route path="trips/:id"  element={<TripDetails />} />
-              <Route path="community"  element={<ComingSoon title="Community Feed – Coming in Phase 4" />} />
-              <Route path="packing"    element={<ComingSoon title="Packing Checklist – Coming in Phase 3" />} />
-              <Route path="notes"      element={<ComingSoon title="Trip Notes – Coming in Phase 3" />} />
-              <Route path="budget"     element={<ComingSoon title="Budget Tracker – Coming in Phase 3" />} />
-              <Route path="profile"    element={<ComingSoon title="Profile – Coming in Phase 2" />} />
-
-              {/* Admin routes */}
+              {/* ── Protected app routes ──────────────────────────────────────── */}
               <Route
-                path="admin"
+                path="/app"
                 element={
-                  <ProtectedRoute adminOnly>
-                    <ComingSoon title="Admin Analytics – Coming in Phase 4" />
+                  <ProtectedRoute>
+                    <AppLayout />
                   </ProtectedRoute>
                 }
-              />
-              <Route
-                path="admin/users"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <ComingSoon title="User Management – Coming in Phase 4" />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
+              >
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard"  element={<Dashboard />} />
+                <Route path="ai-planner" element={<AIPlanner />} />
+                <Route path="trips"      element={<MyTrips />} />
+                <Route path="trips/new"  element={<CreateTrip />} />
+                <Route path="trips/:id"  element={<TripDetails />} />
+                <Route path="trips/:id/edit" element={<EditTrip />} />
+                <Route path="community"  element={<Community />} />
+                <Route path="packing"    element={<PackingPage />} />
+                <Route path="notes"      element={<Notes />} />
+                <Route path="budget"     element={<BudgetPage />} />
+                <Route path="profile"    element={<Profile />} />
+                <Route path="security"   element={<SecuritySettings />} />
 
-            {/* 404 */}
-            <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
-          </Routes>
-        </BrowserRouter>
+                {/* Admin routes */}
+                <Route
+                  path="admin"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <ComingSoon title="Admin Analytics – Coming in Phase 4" />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/users"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <ComingSoon title="User Management – Coming in Phase 4" />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
+
+              {/* 404 */}
+              <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </ErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>
   )

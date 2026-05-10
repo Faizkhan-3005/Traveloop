@@ -1,32 +1,32 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import {
-  LayoutDashboard, Map, PlusCircle, Users, BarChart3,
-  Settings, LogOut, Plane, ChevronLeft, ChevronRight,
-  Package, StickyNote, Wallet, Globe
+import { 
+  LayoutDashboard, Map, PlusCircle, Globe, 
+  Package, StickyNote, Wallet, Settings, 
+  ChevronLeft, ChevronRight, LogOut, Sparkles,
+  BarChart3, Users, Plus
 } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-
-const navItems = [
-  { to: '/app/dashboard',  label: 'Dashboard',   icon: LayoutDashboard },
-  { to: '/app/trips',      label: 'My Trips',     icon: Map },
-  { to: '/app/trips/new',  label: 'New Trip',     icon: PlusCircle },
-  { to: '/app/community',  label: 'Community',    icon: Globe },
-  { to: '/app/packing',    label: 'Packing',      icon: Package },
-  { to: '/app/notes',      label: 'Notes',        icon: StickyNote },
-  { to: '/app/budget',     label: 'Budget',       icon: Wallet },
-]
-
-const adminItems = [
-  { to: '/app/admin',      label: 'Analytics',    icon: BarChart3 },
-  { to: '/app/admin/users',label: 'Users',        icon: Users },
-]
+import { useTranslation } from 'react-i18next'
 
 export default function Sidebar() {
   const { user, isAdmin, logout } = useAuth()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
+  const isRTL = i18n.language === 'ar'
+
+  const navItems = [
+    { to: '/app/dashboard',  label: t('nav.dashboard'),   icon: LayoutDashboard },
+    { to: '/app/ai-planner', label: t('nav.ai_planner'),  icon: Sparkles, premium: true },
+    { to: '/app/trips',      label: t('nav.my_trips'),     icon: Map },
+    { to: '/app/trips/new',  label: t('nav.new_trip'),     icon: PlusCircle },
+    { to: '/app/community',  label: t('nav.community'),    icon: Globe },
+    { to: '/app/packing',    label: t('nav.packing'),      icon: Package },
+    { to: '/app/notes',      label: t('nav.notes'),        icon: StickyNote },
+    { to: '/app/budget',     label: t('nav.budget'),       icon: Wallet },
+  ]
 
   const handleLogout = () => {
     logout()
@@ -34,136 +34,124 @@ export default function Sidebar() {
   }
 
   return (
-    <motion.aside
-      animate={{ width: collapsed ? 72 : 240 }}
-      transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="relative flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 overflow-hidden"
+    <motion.aside 
+      initial={false}
+      animate={{ width: collapsed ? 80 : 260 }}
+      className={`h-screen bg-white dark:bg-slate-900 ${isRTL ? 'border-l' : 'border-r'} border-slate-100 dark:border-slate-800 flex flex-col sticky top-0 z-50 shadow-2xl shadow-slate-200/50 dark:shadow-none transition-colors`}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center">
-          <Plane className="w-4 h-4 text-white" />
-        </div>
+      {/* Brand Header */}
+      <div className={`p-6 flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between`}>
         <AnimatePresence>
           {!collapsed && (
-            <motion.span
-              initial={{ opacity: 0, x: -8 }}
+            <motion.div 
+              initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.15 }}
-              className="text-lg font-bold text-slate-900 dark:text-white whitespace-nowrap"
+              exit={{ opacity: 0, x: isRTL ? 20 : -20 }}
+              className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+              onClick={() => navigate('/app/dashboard')}
             >
-              Traveloop
-            </motion.span>
+              <div className="w-10 h-10 bg-brand-600 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-600/30">
+                <Globe className="text-white w-6 h-6" />
+              </div>
+              <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Traveloop</span>
+            </motion.div>
           )}
         </AnimatePresence>
+        
+        <button 
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 transition-colors"
+        >
+          {collapsed ? (isRTL ? <ChevronLeft size={20} /> : <ChevronRight size={20} />) : (isRTL ? <ChevronRight size={20} /> : <ChevronLeft size={20} />)}
+        </button>
       </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navItems.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              isActive ? 'nav-item-active' : 'nav-item'
-            }
-            title={collapsed ? label : undefined}
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto no-scrollbar">
+        {navItems.map((item) => (
+          <NavLink 
+            key={item.to} 
+            to={item.to}
+            className={({ isActive }) => `
+              flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group relative ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}
+              ${isActive 
+                ? 'bg-brand-600 text-white shadow-lg shadow-brand-600/25 scale-[1.02]' 
+                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }
+            `}
+            title={collapsed ? item.label : undefined}
           >
-            <Icon className="w-5 h-5 flex-shrink-0" />
+            <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${item.premium ? 'text-amber-500' : ''}`} />
             <AnimatePresence>
               {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.1 }}
-                  className="whitespace-nowrap"
+                <motion.span 
+                  initial={{ opacity: 0, x: isRTL ? 10 : -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isRTL ? 10 : -10 }}
+                  className="font-bold whitespace-nowrap overflow-hidden text-sm"
                 >
-                  {label}
+                  {item.label}
                 </motion.span>
               )}
             </AnimatePresence>
+            {item.premium && !collapsed && (
+              <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-lg font-black uppercase tracking-tighter`}>New</span>
+            )}
           </NavLink>
         ))}
 
         {isAdmin && (
-          <>
-            <div className="pt-3 pb-1">
-              {!collapsed && (
-                <p className="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Admin
-                </p>
-              )}
-            </div>
-            {adminItems.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  isActive ? 'nav-item-active' : 'nav-item'
-                }
-                title={collapsed ? label : undefined}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.1 }}
-                      className="whitespace-nowrap"
-                    >
-                      {label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </NavLink>
-            ))}
-          </>
+          <div className="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
+            <p className={`text-[10px] font-black uppercase tracking-widest text-slate-400 px-4 mb-2 ${collapsed ? 'text-center' : (isRTL ? 'text-right' : 'text-left')}`}>
+              {collapsed ? t('nav.administration').slice(0, 3).toUpperCase() : t('nav.administration')}
+            </p>
+            <NavLink to="/app/admin" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'} ${isActive ? 'bg-slate-100 dark:bg-slate-800' : 'text-slate-500 hover:bg-slate-50'}`}>
+              <BarChart3 className="w-5 h-5 flex-shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0, x: isRTL ? 10 : -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: isRTL ? 10 : -10 }}
+                    className="font-bold text-sm"
+                  >
+                    {t('nav.analytics')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </NavLink>
+          </div>
         )}
       </nav>
 
-      {/* User + logout */}
-      <div className="border-t border-slate-100 dark:border-slate-800 px-3 py-3 space-y-1">
-        <NavLink to="/app/profile" className={({ isActive }) => isActive ? 'nav-item-active' : 'nav-item'} title={collapsed ? 'Profile' : undefined}>
-          {user?.avatarUrl
-            ? <img src={user.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
-            : <Settings className="w-5 h-5 flex-shrink-0" />
+      {/* User Section */}
+      <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+        <NavLink 
+          to="/app/profile"
+          className={({ isActive }) => `
+            flex items-center gap-3 p-3 rounded-2xl transition-all group ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}
+            ${isActive ? 'bg-slate-50 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}
+          `}
+        >
+          {user?.avatarUrl 
+            ? <img src={user.avatarUrl} alt="" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
+            : <div className="w-9 h-9 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 font-bold text-sm">{user?.name?.[0]}</div>
           }
           <AnimatePresence>
             {!collapsed && (
-              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap truncate">
-                {user?.name || 'Profile'}
-              </motion.span>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex-1 min-w-0"
+              >
+                <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user?.name}</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">{user?.role}</p>
+              </motion.div>
             )}
           </AnimatePresence>
         </NavLink>
-
-        <button onClick={handleLogout} className="nav-item w-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title={collapsed ? 'Logout' : undefined}>
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="whitespace-nowrap">
-                Logout
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
       </div>
-
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed((c) => !c)}
-        className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition z-10"
-        aria-label="Toggle sidebar"
-      >
-        {collapsed
-          ? <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-          : <ChevronLeft  className="w-3.5 h-3.5 text-slate-500" />
-        }
-      </button>
     </motion.aside>
   )
 }

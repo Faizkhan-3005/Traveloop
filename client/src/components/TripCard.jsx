@@ -1,17 +1,46 @@
-import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { Calendar, MapPin, Users, ArrowRight, MoreVertical, Edit2, Trash2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useEffect } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import api from '../services/api'
+import toast from 'react-hot-toast'
+import DeleteTripModal from './DeleteTripModal'
 
 export default function TripCard({ trip }) {
-  const startDate = new Date(trip.startDate).toLocaleDateString('en-US', {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [showMenu, setShowMenu] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const menuRef = useRef(null)
+
+  const startDate = trip.startDate ? new Date(trip.startDate).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-  })
-  const endDate = new Date(trip.endDate).toLocaleDateString('en-US', {
+  }) : 'TBD'
+  const endDate = trip.endDate ? new Date(trip.endDate).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+  }) : ''
+
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/trips/${trip.id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['trips'])
+      toast.success('Trip deleted successfully')
+      setShowDeleteModal(false)
+    },
+    onError: () => toast.error('Failed to delete trip')
   })
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <motion.div
@@ -33,9 +62,53 @@ export default function TripCard({ trip }) {
           </div>
         </div>
         {trip.isPublic && (
-          <span className="absolute top-4 right-4 badge-blue">Public</span>
+          <span className="absolute top-4 left-4 badge-blue backdrop-blur-md bg-brand-500/20 text-brand-100 border border-brand-500/30">Public</span>
         )}
+
+        <div className="absolute top-4 right-4" ref={menuRef}>
+          <button 
+            onClick={(e) => { e.preventDefault(); setShowMenu(!showMenu) }}
+            className="w-8 h-8 rounded-full bg-black/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/40 transition-all border border-white/20"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+          
+          <AnimatePresence>
+            {showMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 p-1.5 overflow-hidden"
+              >
+                <Link 
+                  to={`/app/trips/${trip.id}/edit`}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <Edit2 className="w-4 h-4 text-brand-500" />
+                  Edit Trip
+                </Link>
+                <button 
+                  onClick={(e) => { e.preventDefault(); setShowDeleteModal(true); setShowMenu(false) }}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Trip
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
+
+      <DeleteTripModal 
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        tripName={trip.title}
+        destination={trip.destination}
+        isPending={deleteMutation.isPending}
+      />
 
       <div className="p-5 space-y-4">
         <div className="flex items-center justify-between text-sm">

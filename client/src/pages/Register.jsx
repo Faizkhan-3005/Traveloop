@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Eye, EyeOff, Mail, Lock, User, MapPin, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, MapPin, Loader2, Globe } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 export default function Register() {
   const { register } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
-    name: '', email: '', password: '', city: '', country: '',
+    name: '', email: '', password: '', city: '', country: '', gender: 'PREFER_NOT_TO_SAY'
   })
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
@@ -41,7 +43,7 @@ export default function Register() {
     { id: 'name',     label: 'Full Name',       type: 'text',     icon: User,    placeholder: 'Jane Doe',            required: true },
     { id: 'email',    label: 'Email',           type: 'email',    icon: Mail,    placeholder: 'jane@example.com',    required: true },
     { id: 'city',     label: 'City (optional)', type: 'text',     icon: MapPin,  placeholder: 'London',              required: false },
-    { id: 'country',  label: 'Country (optional)', type: 'text', icon: MapPin,  placeholder: 'UK',                  required: false },
+    { id: 'country',  label: 'Country (optional)', type: 'text', icon: Globe,   placeholder: 'UK',                  required: false },
   ]
 
   return (
@@ -64,7 +66,7 @@ export default function Register() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {fields.map(({ id, label, type, icon: Icon, placeholder, required }) => (
           <div key={id}>
-            <label htmlFor={id} className="label">{label}</label>
+            <label htmlFor={id} className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">{label}</label>
             <div className="relative">
               <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
@@ -76,15 +78,34 @@ export default function Register() {
                 onChange={handleChange}
                 placeholder={placeholder}
                 autoComplete={id}
-                className="input pl-10"
+                className="input pl-10 h-12"
               />
             </div>
           </div>
         ))}
 
+        {/* Gender */}
+        <div>
+          <label className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">{t('common.gender')}</label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <select
+              name="gender"
+              value={form.gender}
+              onChange={handleChange}
+              className="input pl-10 h-12 appearance-none"
+            >
+              <option value="MALE">{t('common.male')}</option>
+              <option value="FEMALE">{t('common.female')}</option>
+              <option value="OTHER">{t('common.other')}</option>
+              <option value="PREFER_NOT_TO_SAY">{t('common.prefer_not_to_say')}</option>
+            </select>
+          </div>
+        </div>
+
         {/* Password */}
         <div>
-          <label htmlFor="password" className="label">Password</label>
+          <label htmlFor="password" className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">Password</label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -96,7 +117,7 @@ export default function Register() {
               onChange={handleChange}
               placeholder="Min. 6 characters"
               autoComplete="new-password"
-              className="input pl-10 pr-10"
+              className="input pl-10 pr-10 h-12"
             />
             <button
               type="button"
@@ -112,15 +133,15 @@ export default function Register() {
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary btn-lg w-full justify-center"
+          className="btn-primary btn-lg w-full justify-center h-14 rounded-2xl shadow-xl shadow-brand-500/20"
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Account'}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400">
+        <Link to="/login" className="font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400">
           Sign in
         </Link>
       </p>

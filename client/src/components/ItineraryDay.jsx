@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Plus, Calendar as CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react'
+import { GripVertical, Plus, Calendar as CalendarIcon, ChevronDown, ChevronUp, Clock, DollarSign } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 

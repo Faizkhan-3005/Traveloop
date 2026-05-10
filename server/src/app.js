@@ -8,6 +8,9 @@ const authRoutes      = require('./routes/authRoutes')
 const tripRoutes      = require('./routes/tripRoutes')
 const dashboardRoutes = require('./routes/dashboardRoutes')
 const publicRoutes    = require('./routes/publicRoutes')
+const notificationRoutes = require('./routes/notificationRoutes')
+const aiRoutes        = require('./routes/aiRoutes')
+const notesRoutes     = require('./routes/notesRoutes')
 
 const app = express()
 
@@ -31,6 +34,9 @@ app.use('/api/auth',      authRoutes)
 app.use('/api/trips',     tripRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/public',    publicRoutes)
+app.use('/api/notifications', notificationRoutes)
+app.use('/api/ai',        aiRoutes)
+app.use('/api/notes',     notesRoutes)
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((_req, res) => {

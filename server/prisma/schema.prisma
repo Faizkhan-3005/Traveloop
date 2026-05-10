@@ -14,6 +14,14 @@ enum Role {
   ADMIN
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 model User {
@@ -23,14 +31,34 @@ model User {
   passwordHash String
   city         String?
   country      String?
+  bio          String?
   avatarUrl    String?
+  bannerUrl    String?
+  currency     String   @default("USD")
+  language     String   @default("en")
   role         Role     @default(USER)
+  gender       Gender?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   trips          Trip[]
   communityPosts CommunityPost[]
   savedPosts     SavedPost[]
+  notifications  Notification[]
+  notes          TripNote[]
+}
+
+// ─── Notification ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String   @default("info") // "info", "trip", "packing", "community"
+  read      Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 // ─── City & Activity (seeded master data) ─────────────────────────────────────
@@ -54,7 +82,7 @@ model Activity {
   id          String   @id @default(uuid())
   name        String
   description String?
-  category    String?  // e.g. "Adventure", "Culture", "Food"
+  category    String?
   imageUrl    String?
   durationHrs Float?
   price       Float?
@@ -135,8 +163,8 @@ model ItineraryActivity {
 
 model BudgetItem {
   id        String   @id @default(uuid())
-  name      String
-  category  String   // e.g. "Accommodation", "Food", "Transport"
+  name      String?
+  category  String
   amount    Float
   currency  String   @default("USD")
   tripId    String
@@ -149,7 +177,7 @@ model BudgetItem {
 model PackingItem {
   id        String   @id @default(uuid())
   label     String
-  category  String?  // e.g. "Clothes", "Documents", "Tech"
+  category  String?
   packed    Boolean  @default(false)
   tripId    String
   trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -161,10 +189,14 @@ model PackingItem {
 model TripNote {
   id        String   @id @default(uuid())
   title     String?
-  content   Json     // flexible JSON content (text, blocks, etc.)
-  dayRef    Int?     // optional reference to an itinerary day number
-  tripId    String
-  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  pinned    Boolean  @default(false)
+  favorite  Boolean  @default(false)
+  tags      String[]
+  ownerId   String
+  user      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tripId    String?
+  trip      Trip?    @relation(fields: [tripId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -174,7 +206,7 @@ model TripNote {
 model CommunityPost {
   id            String   @id @default(uuid())
   caption       String?
-  imageUrls     String[] // array of image URL strings
+  imageUrls     String[]
   likesCount    Int      @default(0)
   savesCount    Int      @default(0)
   commentsCount Int      @default(0)
