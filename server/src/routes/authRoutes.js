@@ -1,9 +1,16 @@
 const { Router } = require('express')
-const { login, register } = require('../controllers/authController')
+const { register, login, me, updateProfile } = require('../controllers/authController')
+const { requireAuth } = require('../middleware/auth')
+const { authLimiter } = require('../middleware/rateLimit')
 
 const router = Router()
 
-router.post('/register', register)
-router.post('/login', login)
+// Public routes (stricter rate limit)
+router.post('/register', authLimiter, register)
+router.post('/login',    authLimiter, login)
+
+// Protected routes
+router.get('/me',            requireAuth, me)
+router.patch('/profile',     requireAuth, updateProfile)
 
 module.exports = router

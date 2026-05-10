@@ -5,6 +5,6 @@ const { authenticatedLimiter } = require('../middleware/rateLimit')
 
 const router = Router()
 
-router.get('/', authenticatedLimiter, requireAuth, getDashboard)
+router.get('/', requireAuth, getDashboard)
 
 module.exports = router

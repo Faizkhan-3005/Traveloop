@@ -1,3 +1,4 @@
+````markdown
 # Traveloop
 
 Traveloop is a full-stack travel planning platform built with:
@@ -31,9 +32,12 @@ server/   # Express API + Prisma schema
 ### Backend
 
 ```bash
-cd /home/runner/work/Traveloop/Traveloop/server
+cd server
 cp .env.example .env
-# set DATABASE_URL to your Neon PostgreSQL URL and JWT_SECRET
+
+# Set DATABASE_URL to your Neon PostgreSQL URL
+# Set JWT_SECRET for authentication
+
 npm install
 npm run prisma:generate
 npm run prisma:migrate
@@ -43,9 +47,14 @@ npm run dev
 ### Frontend
 
 ```bash
-cd /home/runner/work/Traveloop/Traveloop/client
+cd client
 npm install
 npm run dev
 ```
 
-Set `VITE_API_URL` (optional) to point to your API, e.g. `http://localhost:5000/api`.
+Set `VITE_API_URL` (optional) to point to your API, for example:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+````
