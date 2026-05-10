@@ -12,10 +12,12 @@ const {
   togglePublicShare,
 } = require('../controllers/tripController')
 const { requireAuth } = require('../middleware/auth')
+const { authenticatedLimiter } = require('../middleware/rateLimit')
 
 const router = Router()
 
 router.use(requireAuth)
+router.use(authenticatedLimiter)
 router.get('/', listTrips)
 router.post('/', createTrip)
 router.post('/:tripId/cities', addCity)
